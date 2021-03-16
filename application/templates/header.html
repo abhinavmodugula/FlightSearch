@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FlightSearch - Search for Flight Quotes using the SkyScanner API</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+       <a class="navbar-brand" href="{{url_for('main_bp.index')}}">FlightSearch</a>
+       <a class="navbar-brand" href="{{url_for('main_bp.index')}}">
+            <img src="static/flight.jpeg" alt="logo" style="width:40px;">
+       </a>
+       <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <a href="#" class="btn btn-secondary btn-lg active" role="button" aria-pressed="true">Click to see Source Code</a>
+       </div>
+    </nav>
+
+    {% block content %}{% endblock %}
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <!-- <script src="static/js/jquery-3.4.1.min.js"></script> -->
+
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <!--<script src="static/js/popper.min.js"></script>-->
+    <!--<script src="static/js/bootstrap-4.4.1.js"></script>-->
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+  </body>
+</html>
