@@ -58,11 +58,18 @@ def search():
 
     #Next, parse the start date
     start_date = request.form["start_date"]
+    try:
+        entire_month = request.form["checkbox"]
+    except:
+        entire_month = "false"
 
     #Now, I need to extract the cheapest Quote object and all other quote objects
-    cheapest, all_quotes, airports = get_quotes(scanner, start_codes[0], end_codes[0], start_date)
+    cheapest, all_quotes, airports = get_quotes(scanner, start_codes[0], end_codes[0], start_date, entire_month)
 
-    #TODO: Return error if no quotes found
+    #Return error if no quotes found
+    if len(all_quotes) == 0:
+        return redirect(url_for("main_bp.no_results"))
+
     return results_page(cheapest, all_quotes, airports, curr_symbol, start_input, end_input)
 
 @main_bp.route("/results_page")
@@ -70,3 +77,7 @@ def results_page(cheapest, all_quotes, airports, curr_symbol, start_in, end_in):
     start = start_in
     end = end_in
     return render_template("results.html", cheapest=cheapest, all_quotes=all_quotes, curr=curr_symbol, s=start, e=end)
+
+@main_bp.route("/no_results")
+def no_results():
+    return render_template("no_res.html")

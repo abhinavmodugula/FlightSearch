@@ -41,7 +41,7 @@ class SkyScanner:
         """Gets the quotes for two specific dates. Only for 1-way trips.
         Returns both 1) quotes in JSON format and 2) a dict of airport_code -> airport_name"""
         quoteRequestPath = "/apiservices/browsequotes/v1.0/"
-        browseQuotesURL = self.rootURL + quoteRequestPath + self.originCountry + "/" + self.currency + "/" + self.locale + "/" + source + "/" + destination + "/" + outboundDate.strftime("%Y-%m-%d") + "/"
+        browseQuotesURL = self.rootURL + quoteRequestPath + self.originCountry + "/" + self.currency + "/" + self.locale + "/" + source + "/" + destination + "/" + outboundDate + "/"
         response = self.session.get(browseQuotesURL)
         resultJSON = json.loads(response.text)
         
@@ -113,12 +113,16 @@ class Quote():
         self.end_airport = end_air
         self.price = price
 
-def get_quotes(scanner: SkyScanner, start, end, start_date):
+def get_quotes(scanner: SkyScanner, start, end, start_date, entire_month="false"):
     """Returns the cheapest quote and then all other quotes
     given the params and a scanner object"""
     all_quotes = []
-    start_date = string_to_date(start_date)
-    quotes, airports = scanner.get_quotes_oneway(start, end, start_date)
+    if entire_month == "false":
+        quotes, airports = scanner.get_quotes_oneway(start, end, start_date)
+    else:
+        start_date = start_date.split("-")[0] + "-" + start_date.split("-")[1]
+        quotes, airports = scanner.get_quotes_oneway(start, end, start_date)
+    print(quotes)
     for quote in quotes[0]:
         price = quote['MinPrice']
         start_airport = airports[quote['OutboundLeg']["OriginId"]]
@@ -135,7 +139,8 @@ def get_quotes(scanner: SkyScanner, start, end, start_date):
             cheapest_quote = quote
             cheapest_index = i
 
-    del all_quotes[cheapest_index]
+    if cheapest_index is not None:
+        del all_quotes[cheapest_index]
     return cheapest_quote, all_quotes, airports
         
         
