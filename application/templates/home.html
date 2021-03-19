@@ -76,18 +76,6 @@ input[type=submit] {
 <hr class="my-4">
 <div class="card border-dark">
     <form action="{{url_for('main_bp.search')}}" method="POST">
-    <div class="card-header bg-secondary col-lg-6 offset-lg-3">
-        <div class="form-check">
-        <div class="custom-control custom-radio custom-control-inline">
-            <label class="radio-inline">
-              <input type="radio" onchange="document.getElementById('end_date').value='';document.getElementById('end_date').hidden= !this.checked;" name="optradio" checked>Round Trip
-            </label>
-        </div>
-            <label class="radio-inline">
-              <input type="radio" onchange="document.getElementById('end_date').value='';document.getElementById('end_date').hidden= this.checked;" name="optradio">One Way
-            </label>
-        </div>
-    </div>
     <div class="card-body col-lg-6 offset-lg-3 border-dark bg-light">
           <div class="form-group">
             <label for="start">Starting Destination:</label>
@@ -95,7 +83,7 @@ input[type=submit] {
               <input type="text" class="form-control" id="start" name="start" placeholder="Search for Cities or Airports" required>
               </div>
             <label for="start_date">Departure Date: </label>
-            <input type="date" id="start_date" name="start_date">
+            <input type="date" id="start_date" name="start_date" required>
           </div>
     </div>
     <div class="card-body col-lg-6 offset-lg-3 border-dark bg-light">
@@ -104,8 +92,6 @@ input[type=submit] {
             <div class="card-body">
             <input type="text" class="form-control" id="end" name="end" placeholder="Search for Cities or Airports" required>
             </div>
-            <label for="end_date">Return Date (for round trips):</label>
-            <input type="date" id="end_date" name="end_date">
           </div>
     </div>
     <hr/>

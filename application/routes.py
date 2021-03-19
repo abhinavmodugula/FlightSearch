@@ -5,7 +5,7 @@ Routes for the main functionality of the app
 
 from datetime import datetime
 from flask import render_template, request, flash, redirect, url_for, session, g, Blueprint
-from .search import SkyScanner, get_currencies, get_location_codes
+from .search import SkyScanner, get_currencies, get_location_codes, get_quotes
 
 # Blueprint Configuration
 main_bp = Blueprint(
@@ -36,12 +36,16 @@ def search():
     #convert index of selection to curr code
     if (curr_val == "1000"):
         curr_val = currencies[0]['Code']
+        curr_symbol = currencies[0]['Symbol']
     elif (curr_val == "1001"):
         curr_val = currencies[1]['Code']
+        curr_symbol = currencies[1]['Symbol']
     elif (curr_val == "1002"):
         curr_val = currencies[2]['Code']
+        curr_symbol = currencies[2]['Symbol']
     else:
         curr_val = currencies[3:][int(curr_val) - 1]["Code"]
+        curr_symbol = currencies[3:][int(curr_val) - 1]["Symbol"]
 
     scanner = SkyScanner(currency=curr_val)
     #Next, parse the start and end locations and assign codes
@@ -52,16 +56,14 @@ def search():
     start_codes = get_location_codes(scanner, start_input)
     end_codes = get_location_codes(scanner, end_input)
 
-    #Next, parse the start and end dates
-    one_way = False
+    #Next, parse the start date
     start_date = request.form["start_date"]
-    end_date = request.form["end_date"]
-    if (end_code == None):
-        one_way = True
 
     #Now, I need to extract the cheapest Quote object and all other quote objects
-    return redirect(url_for("main_bp.index"))
+    cheapest, all_quotes, airports = get_quotes(scanner, start_codes[0], end_codes[0], start_date)
+    #TODO: Return error if no quotes found
+    return results_page(cheapest, all_quotes, airports, curr_symbol)
 
 @main_bp.route("/results_page")
-def results_page():
-    pass
+def results_page(cheapest, all_quotes, airports, curr_symbol):
+    return render_template("results.html", cheapest=cheapest, all_quotes=all_quotes, curr=curr_symbol)

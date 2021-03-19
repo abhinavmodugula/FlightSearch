@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime
 import json
 import requests
 import os
@@ -41,22 +42,6 @@ class SkyScanner:
         Returns both 1) quotes in JSON format and 2) a dict of airport_code -> airport_name"""
         quoteRequestPath = "/apiservices/browsequotes/v1.0/"
         browseQuotesURL = self.rootURL + quoteRequestPath + self.originCountry + "/" + self.currency + "/" + self.locale + "/" + source + "/" + destination + "/" + outboundDate.strftime("%Y-%m-%d") + "/"
-        response = self.session.get(browseQuotesURL)
-        resultJSON = json.loads(response.text)
-        
-        if("Quotes" in resultJSON):
-            self.quotes.append(resultJSON["Quotes"])    
-            for Places in resultJSON["Places"]:
-            # Add the airport in the dictionary.
-                self.airports[Places["PlaceId"]] = Places["Name"]
-        
-        return self.quotes, self.airports
-    
-    def get_quotes_twoway(self, source, destination, outboundDate, inboundDate):
-        """Gets the quotes for two specific dates. Only for roundway trips.
-        Returns both 1) quotes in JSON format and 2) a dict of airport_code -> airport_name"""
-        quoteRequestPath = "/apiservices/browsequotes/v1.0/"
-        browseQuotesURL = self.rootURL + quoteRequestPath + self.originCountry + "/" + self.currency + "/" + self.locale + "/" + source + "/" + destination + "/" + outboundDate.strftime("%Y-%m-%d") + "/" + inboundDate.strftime("%Y-%m-%d")
         response = self.session.get(browseQuotesURL)
         resultJSON = json.loads(response.text)
         
@@ -114,6 +99,42 @@ def get_location_codes(scanner, input):
     for i in matches["Places"]:
         codes.append(i["PlaceId"])
     return codes
+
+def string_to_date(str):
+    return datetime.datetime.strptime(str, "%Y-%m-%d").date()
+
+class Quote():
+    def __init__(self, start_time, start_air, end_air, price):
+        self.company = ""
+        self.start_time = start_time
+        self.start_airport = start_air
+        self.end_airport = end_air
+        self.price = price
+
+def get_quotes(scanner: SkyScanner, start, end, start_date):
+    """Returns the cheapest quote and then all other quotes
+    given the params and a scanner object"""
+    all_quotes = []
+    start_date = string_to_date(start_date)
+    quotes, airports = scanner.get_quotes_oneway(start, end, start_date)
+    for quote in quotes[0]:
+        price = quote['MinPrice']
+        start_airport = airports[quote['OutboundLeg']["OriginId"]]
+        end_airport = airports[quote['OutboundLeg']["DestinationId"]]
+        start_time = quote['OutboundLeg']["DepartureDate"].split("T")[0]
+        all_quotes.append(Quote(start_time, start_airport, end_airport, price))
+    cheapest_price = 9999999999999
+    cheapest_quote = None
+    cheapest_index = None
+
+    for i, quote in enumerate(all_quotes):
+        if quote.price < cheapest_price:
+            cheapest_price = quote.price
+            cheapest_quote = quote
+            cheapest_index = i
+
+    del all_quotes[cheapest_index]
+    return cheapest_quote, all_quotes, airports
         
         
     

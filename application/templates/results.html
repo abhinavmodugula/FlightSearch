@@ -1,0 +1,31 @@
+{%  extends 'header.html' %}
+
+{% block content %}
+    <br>
+    <br>
+    <br>
+<div class="card border-success">
+<div class="card-header">
+    <h>Cheapest Ticket</h>
+</div>
+<div class = "card-body">
+    <div class="card">
+        <div class="card-body">
+            {{ curr }}{{ cheapest.price }} -
+            {{ cheapest.start_airport }} -> {{ cheapest.end_airport }}
+            ({{ cheapest.start_time }})
+        </div>
+    </div>
+</div>
+</div>
+<h> Other tickets: </h>
+{%  for quote in all_quotes %}
+    <div class="card">
+        <div class="card-body">
+            {{ curr }}{{ quote.price }} -
+            {{ quote.start_airport }} -> {{ quote.end_airport }}
+            ({{ quote.start_time }})
+        </div>
+    </div>
+    {% endfor %}
+{%  endblock %}
