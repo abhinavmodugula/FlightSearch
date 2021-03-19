@@ -61,9 +61,12 @@ def search():
 
     #Now, I need to extract the cheapest Quote object and all other quote objects
     cheapest, all_quotes, airports = get_quotes(scanner, start_codes[0], end_codes[0], start_date)
+
     #TODO: Return error if no quotes found
-    return results_page(cheapest, all_quotes, airports, curr_symbol)
+    return results_page(cheapest, all_quotes, airports, curr_symbol, start_input, end_input)
 
 @main_bp.route("/results_page")
-def results_page(cheapest, all_quotes, airports, curr_symbol):
-    return render_template("results.html", cheapest=cheapest, all_quotes=all_quotes, curr=curr_symbol)
+def results_page(cheapest, all_quotes, airports, curr_symbol, start_in, end_in):
+    start = start_in
+    end = end_in
+    return render_template("results.html", cheapest=cheapest, all_quotes=all_quotes, curr=curr_symbol, s=start, e=end)

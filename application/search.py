@@ -100,6 +100,8 @@ def get_location_codes(scanner, input):
         codes.append(i["PlaceId"])
     return codes
 
+
+
 def string_to_date(str):
     return datetime.datetime.strptime(str, "%Y-%m-%d").date()
 
