@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import requests
-import datetime
+import os
 from .secret import rapidapi_key
 """
 This file has helper methods to 
@@ -20,12 +20,12 @@ class SkyScanner:
     """ Class to interact with the SkyScanner API and
     retrieve the raw JSON output"""
     
-    def __init__(self, originCountry = "US", currency = "USD", locale = "en-US"):
+    def __init__(self, originCountry = "US", currency = "USD", locale="en-US"):
         """Creates a SkyScanner object with default country, currency, and local
         which can be changed as necessary. In addition, a requests session is made."""
         self.originCountry = originCountry
         self.currency = currency
-        self.local = locale
+        self.locale = locale
         self.rootURL = "https://skyscanner-skyscanner-flight-search-v1.p.rapidapi.com" #path to the API
         self.airports = {}
         self.quotes = []
@@ -79,12 +79,41 @@ class SkyScanner:
         params["includeCities"] = city
         params["includeCountries"] = country
         placeRequestPath = "/apiservices/autosuggest/v1.0/"
-        browsePlacesURL = self.rootURL + self.placeRequestPath + self.originCountry + "/" + self.currency + "/" + self.locale + "/"
+        browsePlacesURL = self.rootURL + placeRequestPath + self.originCountry + "/" + self.currency + "/" + self.locale + "/"
         response = self.session.get(browsePlacesURL, params=params)
         resultJSON = json.loads(response.text)
         return resultJSON
-    
-    
+
+def get_currencies():
+    """Returns an array of all currencies
+    supported. USD, EUR, GPD are the first three"""
+    here = os.path.dirname(os.path.abspath(__file__))
+    data_path = os.path.join(here, "currencies.json")
+    with open(data_path) as f:
+        data = json.load(f)
+    curr_array = [0] * 152 #152 total currenies
+    for i in range(152):
+        curr_array[i] = data['Currencies'][i]
+
+    #move the three common ones to the front
+    swap_front = [139, 43, 45]
+    counter = 0
+    for i in swap_front:
+        tmp = curr_array[counter]
+        curr_array[counter] = data['Currencies'][i]
+        curr_array[i] = tmp
+        counter += 1
+
+    return curr_array
+
+def get_location_codes(scanner, input):
+    """Take user input and convert to location code
+    which can be used in the API"""
+    matches = scanner.search_places(input)
+    codes = []
+    for i in matches["Places"]:
+        codes.append(i["PlaceId"])
+    return codes
         
         
     

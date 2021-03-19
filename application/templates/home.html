@@ -1,4 +1,454 @@
 {%  extends 'header.html' %}
 {% block content %}
-<p>Hi</p>
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font: 16px Arial;
+}
+
+/*the container must be positioned relative:*/
+.autocomplete {
+  position: relative;
+  display: inline-block;
+}
+
+input {
+  border: 1px solid transparent;
+  background-color: #f1f1f1;
+  padding: 10px;
+  font-size: 16px;
+}
+
+input[type=text] {
+  background-color: #f1f1f1;
+  width: 100%;
+}
+
+input[type=submit] {
+  background-color: DodgerBlue;
+  color: #fff;
+  cursor: pointer;
+}
+
+.autocomplete-items {
+  position: absolute;
+  border: 1px solid #d4d4d4;
+  border-bottom: none;
+  border-top: none;
+  z-index: 99;
+  /*position the autocomplete items to be the same width as the container:*/
+  top: 100%;
+  left: 0;
+  right: 0;
+}
+
+.autocomplete-items div {
+  padding: 10px;
+  cursor: pointer;
+  background-color: #fff;
+  border-bottom: 1px solid #d4d4d4;
+}
+
+/*when hovering an item:*/
+.autocomplete-items div:hover {
+  background-color: #e9e9e9;
+}
+
+/*when navigating through the items using the arrow keys:*/
+.autocomplete-active {
+  background-color: DodgerBlue !important;
+  color: #ffffff;
+}
+</style>
+
+    <br>
+    <br>
+    <br>
+
+    <div class="jumbotron jumbotron-fluid text-center">
+        <br>
+        <h class="lead"><b>Get Started By Searching for Flights Between Two Destinations</b></h>
+        <p>Instructions: Start typing a country, city, or airport. Some suggestions appear but other inputs can be entered as well.
+        We will match it to the closest place in our dataset.</p>
+<hr class="my-4">
+<div class="card border-dark">
+    <form action="{{url_for('main_bp.search')}}" method="POST">
+    <div class="card-header bg-secondary col-lg-6 offset-lg-3">
+        <div class="form-check">
+        <div class="custom-control custom-radio custom-control-inline">
+            <label class="radio-inline">
+              <input type="radio" onchange="document.getElementById('end_date').value='';document.getElementById('end_date').hidden= !this.checked;" name="optradio" checked>Round Trip
+            </label>
+        </div>
+            <label class="radio-inline">
+              <input type="radio" onchange="document.getElementById('end_date').value='';document.getElementById('end_date').hidden= this.checked;" name="optradio">One Way
+            </label>
+        </div>
+    </div>
+    <div class="card-body col-lg-6 offset-lg-3 border-dark bg-light">
+          <div class="form-group">
+            <label for="start">Starting Destination:</label>
+              <div class="card-body">
+              <input type="text" class="form-control" id="start" name="start" placeholder="Search for Cities or Airports" required>
+              </div>
+            <label for="start_date">Departure Date: </label>
+            <input type="date" id="start_date" name="start_date">
+          </div>
+    </div>
+    <div class="card-body col-lg-6 offset-lg-3 border-dark bg-light">
+        <div class="form-group">
+            <label for="end">Ending Destination:</label>
+            <div class="card-body">
+            <input type="text" class="form-control" id="end" name="end" placeholder="Search for Cities or Airports" required>
+            </div>
+            <label for="end_date">Return Date (for round trips):</label>
+            <input type="date" id="end_date" name="end_date">
+          </div>
+    </div>
+    <hr/>
+    <div class="card-body bg-light col-lg-6 offset-lg-3">
+            <label for="curr">&#127974; Currency</label>
+            <select class="custom-select" id="curr" name="curr">
+              <option selected value='1000'>{{ curr_names[0] }}</option>
+              <option value='1001'>{{ curr_names[1] }}</option>
+              <option value='1002'>{{ curr_names[2] }}</option>
+              <br>
+                {% for name in rest %}
+                    <option value={{ loop.index }}>{{ name }}</option>
+                {%  endfor %}
+
+
+            </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Search Bookings!</button>
+    </form>
+</div>
+
+
+<script>
+function autocomplete(inp, arr) {
+  /*the autocomplete function takes two arguments,
+  the text field element and an array of possible autocompleted values:*/
+  var currentFocus;
+  /*execute a function when someone writes in the text field:*/
+  inp.addEventListener("input", function(e) {
+      var a, b, i, val = this.value;
+      /*close any already open lists of autocompleted values*/
+      closeAllLists();
+      if (!val) { return false;}
+      currentFocus = -1;
+      /*create a DIV element that will contain the items (values):*/
+      a = document.createElement("DIV");
+      a.setAttribute("id", this.id + "autocomplete-list");
+      a.setAttribute("class", "autocomplete-items");
+      /*append the DIV element as a child of the autocomplete container:*/
+      this.parentNode.appendChild(a);
+      /*for each item in the array...*/
+      for (i = 0; i < arr.length; i++) {
+        /*check if the item contains the other*/
+        if (arr[i].toUpperCase().includes(val.toUpperCase())) {
+          var indexMatch = arr[i].toUpperCase().indexOf(val.toUpperCase());
+          /*create a DIV element for each matching element:*/
+          b = document.createElement("DIV");
+          /*make the matching letters bold:*/
+          b.innerHTML = arr[i].substr(0,indexMatch);
+          b.innerHTML += "<strong>" + arr[i].substr(indexMatch, val.length) + "</strong>";
+          b.innerHTML += arr[i].substr(indexMatch + val.length);
+          /*insert a input field that will hold the current array item's value:*/
+          b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+          /*execute a function when someone clicks on the item value (DIV element):*/
+          b.addEventListener("click", function(e) {
+              /*insert the value for the autocomplete text field:*/
+              inp.value = this.getElementsByTagName("input")[0].value;
+              /*close the list of autocompleted values,
+              (or any other open lists of autocompleted values:*/
+              closeAllLists();
+          });
+          a.appendChild(b);
+        }
+      }
+  });
+  /*execute a function presses a key on the keyboard:*/
+  inp.addEventListener("keydown", function(e) {
+      var x = document.getElementById(this.id + "autocomplete-list");
+      if (x) x = x.getElementsByTagName("div");
+      if (e.keyCode == 40) {
+        /*If the arrow DOWN key is pressed,
+        increase the currentFocus variable:*/
+        currentFocus++;
+        /*and and make the current item more visible:*/
+        addActive(x);
+      } else if (e.keyCode == 38) { //up
+        /*If the arrow UP key is pressed,
+        decrease the currentFocus variable:*/
+        currentFocus--;
+        /*and and make the current item more visible:*/
+        addActive(x);
+      } else if (e.keyCode == 13) {
+        /*If the ENTER key is pressed, prevent the form from being submitted,*/
+        e.preventDefault();
+        if (currentFocus > -1) {
+          /*and simulate a click on the "active" item:*/
+          if (x) x[currentFocus].click();
+        }
+      }
+  });
+  function addActive(x) {
+    /*a function to classify an item as "active":*/
+    if (!x) return false;
+    /*start by removing the "active" class on all items:*/
+    removeActive(x);
+    if (currentFocus >= x.length) currentFocus = 0;
+    if (currentFocus < 0) currentFocus = (x.length - 1);
+    /*add class "autocomplete-active":*/
+    x[currentFocus].classList.add("autocomplete-active");
+  }
+  function removeActive(x) {
+    /*a function to remove the "active" class from all autocomplete items:*/
+    for (var i = 0; i < x.length; i++) {
+      x[i].classList.remove("autocomplete-active");
+    }
+  }
+  function closeAllLists(elmnt) {
+    /*close all autocomplete lists in the document,
+    except the one passed as an argument:*/
+    var x = document.getElementsByClassName("autocomplete-items");
+    for (var i = 0; i < x.length; i++) {
+      if (elmnt != x[i] && elmnt != inp) {
+        x[i].parentNode.removeChild(x[i]);
+      }
+    }
+  }
+  /*execute a function when someone clicks in the document:*/
+  document.addEventListener("click", function (e) {
+      closeAllLists(e.target);
+  });
+}
+
+/*An array containing a variety of places:*/
+var countries = ['Laos',
+ 'Munich',
+ 'Vietnam',
+ "Seoul Incheon Int'l",
+ 'Israel',
+ 'Manila Ninoy Aquino',
+ 'New York Newark',
+ 'Toronto Pearson International',
+ 'Pittsburgh International',
+ 'Brazil',
+ 'Paris Orly',
+ 'Denver International',
+ 'Washington Dulles',
+ 'Bogota',
+ 'Spokane International',
+ 'Vancouver International',
+ 'Frankfurt Hahn',
+ 'Zadar',
+ 'New York John F. Kennedy',
+ 'Hyderabad',
+ 'Montreal Pierre Elliott Trudeau',
+ 'Rajiv Gandhi International',
+ 'Raleigh / Durham',
+ 'Queenstown',
+ 'London Luton',
+ 'Barcelona - El Prat',
+ 'Istanbul',
+ 'Hamilton',
+ 'Chapeco',
+ 'Casablanca Mohamed V.',
+ 'Kempegowda International',
+ 'Austria',
+ 'Portland',
+ 'Jeddah',
+ 'London Southend',
+ 'Athens International',
+ 'Miami International',
+ 'Omaha Eppley Airfield',
+ 'Rome Ciampino',
+ 'Egypt',
+ 'Dublin',
+ 'Hong Kong Intl',
+ 'Tucson International',
+ 'Detroit City',
+ 'Riyadh',
+ 'Bucharest Otopeni',
+ 'Amsterdam',
+ 'Houston Hobby',
+ 'Dallas Fort Worth International',
+ 'Istanbul Sabiha',
+ 'Tijuana',
+ 'San Juan Isla Grande',
+ 'Chennai',
+ 'Xi An Xianyang',
+ 'Charlotte Douglas',
+ 'Kuwait',
+ 'Anchorage International',
+ 'Caracas',
+ 'Richmond',
+ 'Eugene',
+ 'Oklahoma City Will Rogers World',
+ 'New Zealand',
+ 'Fresno Yosemite',
+ 'Guatemala City',
+ 'Mykonos',
+ 'Fayetteville Northwest Arkansas Rgn',
+ 'Wichita Mid-Continent',
+ 'Spain',
+ 'London Gatwick',
+ 'Reno / Tahoe',
+ 'Tulsa International',
+ 'France',
+ 'Italy',
+ 'Sanqingshan',
+ 'China',
+ 'Rochester',
+ 'New Delhi',
+ 'London City',
+ 'Sao Paulo Guarulhos',
+ 'Seattle / Tacoma International',
+ 'Amman Queen Alia',
+ 'Houston George Bush Intercntl.',
+ 'Germany',
+ 'Finland',
+ 'Baltimore Washington International',
+ 'San Jose International',
+ 'El Paso International',
+ 'Singapore',
+ 'Xiamen',
+ 'United Kingdom',
+ 'Xishuangbanna Gasa',
+ 'Orlando Sanford',
+ 'Grand Rapids',
+ 'Greece',
+ 'Thành phố Hồ Chí Minh',
+ 'Santorini (Thira)',
+ 'Jacksonville International',
+ 'Guatemala',
+ 'Salt Lake City',
+ 'Chhatrapati Shivaji Maharaj International',
+ 'Quebec',
+ 'Nepal',
+ 'Queretaro',
+ 'Buffalo Niagara',
+ 'Montreal St Hubert',
+ 'Madrid',
+ 'Entebbe',
+ 'Zagreb',
+ 'Philippines',
+ 'Uganda',
+ 'Ho Chi Minh City',
+ 'Philadelphia International',
+ 'Warsaw Chopin',
+ 'Quito',
+ 'London Heathrow',
+ 'Romania',
+ 'London Stansted',
+ 'Kochi',
+ 'Atlanta Hartsfield-Jackson',
+ 'Las Vegas Mccarran',
+ 'Honolulu International',
+ 'West Palm Beach International',
+ 'San Francisco International',
+ 'Greenville-Spartanburg',
+ 'Fort Myers Southwest Florida Reg',
+ 'Tanzania',
+ 'Venezuela',
+ 'Oakland Metropolitan Oak',
+ 'Los Angeles International',
+ 'Minneapolis St Paul',
+ 'Frankfurt am Main',
+ 'Hungary',
+ 'Ben Gurion Intl',
+ 'Providence',
+ 'Orlando International',
+ 'Guayaquil',
+ 'United States',
+ 'Turkey',
+ 'Jerez',
+ 'Montreal Mirabel',
+ 'Argentina',
+ 'Abbotsford',
+ 'Zacatecas',
+ 'Rome Fiumicino',
+ 'New Orleans Louis Armstrong',
+ 'Zanzibar',
+ 'Stewart International',
+ 'Xieng Khouang',
+ 'Ahmedabad',
+ 'Russia',
+ 'Fort Lauderdale International',
+ 'Boston Logan International',
+ 'Cairo',
+ 'Mumbai',
+ 'Kuala Lumpur International',
+ 'Kuala Lumpur Sultan Abdul Azziz Shah',
+ 'Moscow Sheremetyevo',
+ 'San Jose Juan Santamaria',
+ 'Colombia',
+ 'Zurich',
+ 'Pakistan',
+ 'Helsinki Vantaa',
+ 'Morocco',
+ 'Manchester',
+ 'Croatia',
+ 'Paris Beauvais',
+ 'Netherlands',
+ 'Canada',
+ 'Quepos',
+ 'Nashville',
+ 'Barcelona',
+ 'Phoenix Sky Harbor',
+ 'Hartford Bradley International',
+ 'Paris Charles de Gaulle',
+ 'India',
+ 'Saudi Arabia',
+ 'Poland',
+ 'Ecuador',
+ 'San Juan Luis Munoz Marin',
+ 'Knoxville',
+ 'Guadalajara',
+ 'Xining',
+ 'Kansas City International',
+ 'Puerto Rico',
+ 'Malaga',
+ 'Detroit Wayne County',
+ 'Vienna',
+ 'Edinburgh',
+ "Chicago O'Hare International",
+ 'Ireland',
+ 'Ontario International',
+ 'Buenos Aires Ministro Pistarini',
+ 'Tampa International',
+ 'Austin-Bergstrom',
+ 'Jordan',
+ 'Vancouver Boundary Bay',
+ 'Memphis International',
+ 'Las Vegas North Air Terminal',
+ 'Toronto Island',
+ 'New York LaGuardia',
+ 'Vancouver Coal Harbour',
+ 'Geneva',
+ 'Budapest',
+ 'Cancun',
+ 'Indianapolis',
+ 'Singapore Changi',
+ 'Kitchener / Waterloo',
+ 'Mexico City Juarez International',
+ 'Malaysia',
+ 'South Korea',
+ 'Norfolk International',
+ 'Kathmandu',
+ 'Costa Rica',
+ 'Mexico',
+ 'Switzerland',
+ 'Karachi',
+ 'Washington Ronald Reagan'];
+/*initiate the autocomplete function on the "myInput" element, and pass along the countries array as possible autocomplete values:*/
+autocomplete(document.getElementById("start"), countries);
+autocomplete(document.getElementById("end"), countries);
+
+</script>
 {%  endblock %}
