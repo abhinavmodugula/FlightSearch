@@ -31,7 +31,7 @@ class SkyScanner:
         self.airports = {}
         self.quotes = []
         self.places = []
-        self.carriers = []
+        self.carriers = {}
         
         #Create session
         self.session = requests.Session()
@@ -50,6 +50,8 @@ class SkyScanner:
             for Places in resultJSON["Places"]:
             # Add the airport in the dictionary.
                 self.airports[Places["PlaceId"]] = Places["Name"]
+            for Carriers in resultJSON["Carriers"]:
+                self.carriers[Carriers["CarrierId"]] = Carriers["Name"]
         
         return self.quotes, self.airports
     
@@ -106,8 +108,8 @@ def string_to_date(str):
     return datetime.datetime.strptime(str, "%Y-%m-%d").date()
 
 class Quote():
-    def __init__(self, start_time, start_air, end_air, price):
-        self.company = ""
+    def __init__(self, start_time, start_air, end_air, price, company):
+        self.company = company
         self.start_time = start_time
         self.start_airport = start_air
         self.end_airport = end_air
@@ -128,7 +130,8 @@ def get_quotes(scanner: SkyScanner, start, end, start_date, entire_month="false"
         start_airport = airports[quote['OutboundLeg']["OriginId"]]
         end_airport = airports[quote['OutboundLeg']["DestinationId"]]
         start_time = quote['OutboundLeg']["DepartureDate"].split("T")[0]
-        all_quotes.append(Quote(start_time, start_airport, end_airport, price))
+        company = scanner.carriers[quote['OutboundLeg']['CarrierIds'][0]]
+        all_quotes.append(Quote(start_time, start_airport, end_airport, price, company))
     cheapest_price = 9999999999999
     cheapest_quote = None
     cheapest_index = None

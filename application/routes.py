@@ -44,8 +44,9 @@ def search():
         curr_val = currencies[2]['Code']
         curr_symbol = currencies[2]['Symbol']
     else:
-        curr_val = currencies[3:][int(curr_val) - 1]["Code"]
-        curr_symbol = currencies[3:][int(curr_val) - 1]["Symbol"]
+        i = int(curr_val) - 1
+        curr_val = currencies[3:][i]["Code"]
+        curr_symbol = currencies[3:][i]["Symbol"]
 
     scanner = SkyScanner(currency=curr_val)
     #Next, parse the start and end locations and assign codes

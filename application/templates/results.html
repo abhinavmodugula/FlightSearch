@@ -5,31 +5,32 @@
     <br>
     <br>
         <div class="jumbotron jumbotron-fluid text-center">
-            <h1 class="lead"><b><huge>Results for Search</huge></b></h1>
+            <h1 style="font-size:30px" class="lead"><b><huge>Results for Search</huge></b></h1>
         <p>From: {{ s }}</p>
         <p>To: {{ e }}</p>
+
         </div>
-<div class="card border-success">
+<div class="card bg-success">
 <div class="card-header">
     <h>Cheapest Ticket</h>
 </div>
 <div class = "card-body">
     <div class="card">
         <div class="card-body">
-            {{ curr }}{{ cheapest.price }} -
-            {{ cheapest.start_airport }} -> {{ cheapest.end_airport }}
-            ({{ cheapest.start_time }})
+            <p style="color:green;"><b>{{ curr }}{{ cheapest.price }}</b></p>
+            <p><u>{{ cheapest.start_airport }}</u> -> <u>{{ cheapest.end_airport }}</u></p>
+            ({{ cheapest.start_time }}) | by <b>{{ cheapest.company }}</b>
         </div>
     </div>
 </div>
 </div>
 <h> Other tickets: </h>
 {%  for quote in all_quotes %}
-    <div class="card">
+    <div class="card border-dark">
         <div class="card-body">
-            {{ curr }}{{ quote.price }} -
-            {{ quote.start_airport }} -> {{ quote.end_airport }}
-            ({{ quote.start_time }})
+            <p style="color:green;"><b>{{ curr }}{{ quote.price }}</b></p>
+            <p><u>{{ quote.start_airport }}</u> -> <u>{{ quote.end_airport }}</u></p>
+            ({{ quote.start_time }}) | by <b>{{ quote.company }}</b>
         </div>
     </div>
     {% endfor %}
