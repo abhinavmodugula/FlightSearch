@@ -109,7 +109,6 @@ def results_page_rev():
 def results_page_rev_back():
     start = sess.start_in
     end = sess.end_in
-    print(start)
     if sess.all_quotes is not None:
         sess.all_quotes.reverse()
     else:
