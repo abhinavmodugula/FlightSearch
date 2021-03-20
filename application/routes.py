@@ -99,13 +99,16 @@ def results_page(cheapest, all_quotes, airports, curr_symbol, start_in, end_in):
 def results_page_rev():
     start = sess.start_in
     end = sess.end_in
-    all_quotes = reversed(sess.all_quotes)
+    if sess.all_quotes is not None:
+        all_quotes = reversed(sess.all_quotes)
     return render_template("results.html", cheapest=sess.cheapest, all_quotes=all_quotes, curr=sess.curr_symbol, s=start, e=end, rev=True)
 
 @main_bp.route("/results_page_rev_back")
 def results_page_rev_back():
     start = sess.start_in
     end = sess.end_in
+    if sess.all_quotes is not None:
+        sess.all_quotes = reversed(sess.all_quotes)
     return render_template("results.html", cheapest=sess.cheapest, all_quotes=sess.all_quotes, curr=sess.curr_symbol, s=start, e=end, rev=False)
 
 @main_bp.route("/no_results")
