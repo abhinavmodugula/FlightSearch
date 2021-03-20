@@ -8,11 +8,6 @@
             <h1 style="font-size:30px" class="lead"><b><huge>Results for Search</huge></b></h1>
         <p>From: {{ s }}</p>
         <p>To: {{ e }}</p>
-        {% if rev %}
-            <a href="{{ url_for("main_bp.results_page_rev_back") }}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Sort Low to High</a>
-        {% else %}
-            <a href="{{ url_for("main_bp.results_page_rev") }}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Sort High to Low</a>
-        {%  endif %}
 
         </div>
 <div class="card bg-success">

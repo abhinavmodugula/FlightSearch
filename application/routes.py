@@ -14,17 +14,6 @@ main_bp = Blueprint(
     static_folder='static'
 )
 
-class Data:
-    cheapest = None
-    all_quotes = None
-    airports = None
-    curr_symbol = None
-    start_in = None
-    end_in = None
-    scanner = None
-
-sess = Data()
-
 @main_bp.route("/")
 def index():
     """
@@ -60,7 +49,6 @@ def search():
         curr_symbol = currencies[3:][i]["Symbol"]
 
     scanner = SkyScanner(currency=curr_val)
-    sess.scanner = scanner
     #Next, parse the start and end locations and assign codes
     start_code = ""
     end_code = ""
@@ -76,6 +64,11 @@ def search():
     except:
         entire_month = "false"
 
+    #Write inputs to file
+    file = open("inputs.txt", "w")
+    inputs_to_write = [curr_val, start_codes[0], end_codes[0], start_date, entire_month, curr_symbol, start_input, end_input]
+    for i in inputs_to_write:
+        print(i + "\n", file=file)
     #Now, I need to extract the cheapest Quote object and all other quote objects
     cheapest, all_quotes, airports = get_quotes(scanner, start_codes[0], end_codes[0], start_date, entire_month)
 
@@ -83,37 +76,13 @@ def search():
     if len(all_quotes) == 0:
         return redirect(url_for("main_bp.no_results"))
 
-    return results_page(cheapest, all_quotes, airports, curr_symbol, start_input, end_input)
+    return results_page(cheapest, all_quotes, curr_symbol, start_input, end_input)
 
 @main_bp.route("/results_page")
-def results_page(cheapest, all_quotes, airports, curr_symbol, start_in, end_in):
-    sess.cheapest = cheapest
-    sess.all_quotes = all_quotes
-    sess.airports = airports
-    sess.curr_symbol = curr_symbol
-    sess.start_in = start_in
-    sess.end_in = end_in
+def results_page(cheapest, all_quotes, curr_symbol, start_in, end_in):
     start = start_in
     end = end_in
-    return render_template("results.html", cheapest=cheapest, all_quotes=all_quotes, curr=curr_symbol, s=start, e=end, rev=False)
-
-@main_bp.route("/results_page_rev")
-def results_page_rev():
-    start = sess.start_in
-    end = sess.end_in
-    if sess.all_quotes is not None:
-        sess.all_quotes.reverse()
-    return render_template("results.html", cheapest=sess.cheapest, all_quotes=sess.all_quotes, curr=sess.curr_symbol, s=start, e=end, rev=True)
-
-@main_bp.route("/results_page_rev_back")
-def results_page_rev_back():
-    start = sess.start_in
-    end = sess.end_in
-    if sess.all_quotes is not None:
-        sess.all_quotes.reverse()
-    else:
-        sess.all_quotes = sess.scanner.all_quotes
-    return render_template("results.html", cheapest=sess.cheapest, all_quotes=sess.all_quotes, curr=sess.curr_symbol, s=start, e=end, rev=False)
+    return render_template("results.html", cheapest=cheapest, all_quotes=all_quotes, curr=curr_symbol, s=start, e=end)
 
 @main_bp.route("/no_results")
 def no_results():
