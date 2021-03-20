@@ -21,6 +21,7 @@ class Data:
     curr_symbol = None
     start_in = None
     end_in = None
+    scanner = None
 
 sess = Data()
 
@@ -59,6 +60,7 @@ def search():
         curr_symbol = currencies[3:][i]["Symbol"]
 
     scanner = SkyScanner(currency=curr_val)
+    sess.scanner = scanner
     #Next, parse the start and end locations and assign codes
     start_code = ""
     end_code = ""
@@ -107,8 +109,11 @@ def results_page_rev():
 def results_page_rev_back():
     start = sess.start_in
     end = sess.end_in
+    print(start)
     if sess.all_quotes is not None:
         sess.all_quotes.reverse()
+    else:
+        sess.all_quotes = sess.scanner.all_quotes
     return render_template("results.html", cheapest=sess.cheapest, all_quotes=sess.all_quotes, curr=sess.curr_symbol, s=start, e=end, rev=False)
 
 @main_bp.route("/no_results")

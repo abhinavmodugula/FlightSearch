@@ -128,7 +128,6 @@ def get_quotes(scanner: SkyScanner, start, end, start_date, entire_month="false"
     else:
         start_date = start_date.split("-")[0] + "-" + start_date.split("-")[1]
         quotes, airports = scanner.get_quotes_oneway(start, end, start_date)
-    print(quotes)
     for quote in quotes[0]:
         price = quote['MinPrice']
         start_airport = airports[quote['OutboundLeg']["OriginId"]]
