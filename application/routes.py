@@ -14,6 +14,16 @@ main_bp = Blueprint(
     static_folder='static'
 )
 
+class Data:
+    cheapest = None
+    all_quotes = None
+    airports = None
+    curr_symbol = None
+    start_in = None
+    end_in = None
+
+sess = Data()
+
 @main_bp.route("/")
 def index():
     """
@@ -75,9 +85,28 @@ def search():
 
 @main_bp.route("/results_page")
 def results_page(cheapest, all_quotes, airports, curr_symbol, start_in, end_in):
+    sess.cheapest = cheapest
+    sess.all_quotes = all_quotes
+    sess.airports = airports
+    sess.curr_symbol = curr_symbol
+    sess.start_in = start_in
+    sess.end_in = end_in
     start = start_in
     end = end_in
-    return render_template("results.html", cheapest=cheapest, all_quotes=all_quotes, curr=curr_symbol, s=start, e=end)
+    return render_template("results.html", cheapest=cheapest, all_quotes=all_quotes, curr=curr_symbol, s=start, e=end, rev=False)
+
+@main_bp.route("/results_page_rev")
+def results_page_rev():
+    start = sess.start_in
+    end = sess.end_in
+    all_quotes = reversed(sess.all_quotes)
+    return render_template("results.html", cheapest=sess.cheapest, all_quotes=all_quotes, curr=sess.curr_symbol, s=start, e=end, rev=True)
+
+@main_bp.route("/results_page_rev_back")
+def results_page_rev_back():
+    start = sess.start_in
+    end = sess.end_in
+    return render_template("results.html", cheapest=sess.cheapest, all_quotes=sess.all_quotes, curr=sess.curr_symbol, s=start, e=end, rev=False)
 
 @main_bp.route("/no_results")
 def no_results():

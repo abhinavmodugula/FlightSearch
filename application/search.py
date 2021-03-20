@@ -32,6 +32,10 @@ class SkyScanner:
         self.quotes = []
         self.places = []
         self.carriers = {}
+
+        #Used to store data
+        self.cheapest = None
+        self.all_quotes = None
         
         #Create session
         self.session = requests.Session()
@@ -144,6 +148,8 @@ def get_quotes(scanner: SkyScanner, start, end, start_date, entire_month="false"
 
     if cheapest_index is not None:
         del all_quotes[cheapest_index]
+    scanner.cheapest = cheapest_quote
+    scanner.all_quotes = all_quotes
     return cheapest_quote, all_quotes, airports
         
         
